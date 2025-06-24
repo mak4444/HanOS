@@ -15,6 +15,10 @@
 #include <libc/string.h>
 #include <libc/sysfunc.h>
 #include <kernel/proc/syscall.h>
+
+typedef __uint128_t uint128_t;
+typedef __int128_t int128_t;
+
 //#include <libc/strtoll.h>
 uint64_t
 strtoll(const char *nptr, char **endptr, register int base);
@@ -275,25 +279,25 @@ void Again(){ Co(~pBranch);  *here++ = (sCell)Tos; Tos = *Stack++; } pp(Again)
 void While(){ If(); Swap(); } pp(While)
 void Repeat(){ Again(); Then(); }   pp(Repeat)
 
-void DNegate(){ int64_t val =
- -(int64_t)( ((uint64_t)(Cell)Tos<<32) + (uint64_t)(Cell)Stack[0] ) ;
-	Tos= val>>32;
+void DNegate(){ int128_t val =
+ - ( ((uint128_t)(Cell)Tos<<32) + (uint128_t)(Cell)Stack[0] ) ;
+	Tos= val>>64;
 	Stack[0]=val;
   } pp(DNegate)
 
 void DAbs(){   if(Tos<0) DNegate();  } pp(DAbs)
 
 void DAdd()
-{ uint64_t sum= ((uint64_t)(Cell)Tos<<32) + (uint64_t)(Cell)Stack[0] +
-	 ((uint64_t)(Cell)Stack[1]<<32) + (uint64_t)(Cell)Stack[2];
+{ uint128_t sum= ((uint128_t)(Cell)Tos<<32) + (uint128_t)(Cell)Stack[0] +
+	 ((uint128_t)(Cell)Stack[1]<<32) + (uint128_t)(Cell)Stack[2];
 	Stack += 2 ;
-	Tos=(sCell) sum>>32;
+	Tos=(sCell) sum>>64;
 	Stack[0]=sum;
 } pp(DAdd)
 
 void UMMul()
-{ uint64_t mul= (uint64_t)(Cell)Tos * (uint64_t)(Cell)Stack[0] ;
-	Tos= mul>>32;
+{ uint128_t mul= (uint128_t)(Cell)Tos * (uint128_t)(Cell)Stack[0] ;
+	Tos= mul>>64;
 	Stack[0]=mul;
 } pp(UMMul)
 
@@ -329,7 +333,7 @@ void UMMOD()
 	*++Stack=-1;
 	 Tos = -1; return;
         }
-        udiv(Tos,Stack,&Stack[1]);
+        udiv(Tos,(uint64_t *)&Stack,(uint64_t *)&Stack[1]);
         Tos = *Stack++;
 } pp(UMMOD)
 
